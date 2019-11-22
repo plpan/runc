@@ -126,6 +126,7 @@ func (l *linuxStandardInit) Init() error {
 			return err
 		}
 	}
+	// 告知runc create，本容器内进程已准备好执行用户命令
 	// Tell our parent that we're ready to Execv. This must be done before the
 	// Seccomp rules have been applied, because we need to be able to read and
 	// write to a socket.

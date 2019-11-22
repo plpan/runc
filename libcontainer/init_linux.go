@@ -158,10 +158,12 @@ func finalizeNamespace(config *initConfig) error {
 // indicate that it is cleared to Exec.
 func syncParentReady(pipe io.ReadWriter) error {
 	// Tell parent.
+	// 告诉容器父进程，我准备好了。父进程开始进行cgroup初始化，这是在容器内进程执行之前，确保所有容器内进程都在cgroup管控下
 	if err := utils.WriteJSON(pipe, syncT{procReady}); err != nil {
 		return err
 	}
 	// Wait for parent to give the all-clear.
+	// 等待父进程cgroup初始化完毕，之后就可以开始执行用户进程了
 	var procSync syncT
 	if err := json.NewDecoder(pipe).Decode(&procSync); err != nil {
 		if err == io.EOF {

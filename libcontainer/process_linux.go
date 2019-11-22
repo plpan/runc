@@ -215,6 +215,7 @@ func (p *initProcess) execSetns() error {
 		return &exec.ExitError{ProcessState: status}
 	}
 	var pid *pid
+	// pid由nsexec.c子进程写入
 	if err := json.NewDecoder(p.parentPipe).Decode(&pid); err != nil {
 		p.cmd.Wait()
 		return err
@@ -268,6 +269,7 @@ func (p *initProcess) start() error {
 	if err := p.createNetworkInterfaces(); err != nil {
 		return newSystemErrorWithCause(err, "creating nework interfaces")
 	}
+	// 把容器配置传递给容器进程
 	if err := p.sendConfig(); err != nil {
 		return newSystemErrorWithCause(err, "sending config to init process")
 	}
@@ -278,6 +280,7 @@ func (p *initProcess) start() error {
 		ierr       *genericError
 	)
 
+	// 当容器初始化好之后，会传递信号过来
 	dec := json.NewDecoder(p.parentPipe)
 loop:
 	for {
