@@ -43,6 +43,7 @@ func setupRootfs(config *configs.Config, console *linuxConsole, pipe io.ReadWrit
 	}
 
 	setupDev := needsSetupDev(config)
+	// 该挂载的挂载
 	for _, m := range config.Mounts {
 		for _, precmd := range m.PremountCmds {
 			if err := mountCmd(precmd); err != nil {
@@ -59,6 +60,7 @@ func setupRootfs(config *configs.Config, console *linuxConsole, pipe io.ReadWrit
 			}
 		}
 	}
+	// 需要的设备都创建好
 	if setupDev {
 		if err := createDevices(config); err != nil {
 			return newSystemErrorWithCause(err, "creating device nodes")
@@ -77,9 +79,11 @@ func setupRootfs(config *configs.Config, console *linuxConsole, pipe io.ReadWrit
 	if err := syncParentHooks(pipe); err != nil {
 		return err
 	}
+	// 切换到容器根目录
 	if err := syscall.Chdir(config.Rootfs); err != nil {
 		return newSystemErrorWithCausef(err, "changing dir to %q", config.Rootfs)
 	}
+	// 限制容器根目录为当前目录，防止访问宿主文件
 	if config.NoPivotRoot {
 		err = msMoveRoot(config.Rootfs)
 	} else {

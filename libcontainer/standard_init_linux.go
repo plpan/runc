@@ -15,6 +15,7 @@ import (
 	"github.com/opencontainers/runc/libcontainer/label"
 	"github.com/opencontainers/runc/libcontainer/seccomp"
 	"github.com/opencontainers/runc/libcontainer/system"
+	"github.com/opencontainers/runc/libcontainer/utils"
 )
 
 type linuxStandardInit struct {
@@ -86,6 +87,7 @@ func (l *linuxStandardInit) Init() error {
 		}
 	}
 	if hostname := l.config.Config.Hostname; hostname != "" {
+		// 设置新容器的主机名
 		if err := syscall.Sethostname([]byte(hostname)); err != nil {
 			return err
 		}
@@ -102,6 +104,7 @@ func (l *linuxStandardInit) Init() error {
 			return err
 		}
 	}
+	// 特殊设备处理：屏蔽或只读宿主特定设备
 	for _, path := range l.config.Config.ReadonlyPaths {
 		if err := remountReadonly(path); err != nil {
 			return err
@@ -116,6 +119,8 @@ func (l *linuxStandardInit) Init() error {
 	if err != nil {
 		return err
 	}
+	utils.StupigContainerLog(pdeath)
+	// 0
 	if l.config.NoNewPrivileges {
 		if err := system.Prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0); err != nil {
 			return err
@@ -171,6 +176,9 @@ func (l *linuxStandardInit) Init() error {
 			return newSystemErrorWithCause(err, "init seccomp")
 		}
 	}
+	// 执行用户进程
+	utils.StupigContainerLog(l.config.Args)
+	// ["bash"]
 	if err := syscall.Exec(name, l.config.Args[0:], os.Environ()); err != nil {
 		return newSystemErrorWithCause(err, "exec user process")
 	}

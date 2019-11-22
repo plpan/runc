@@ -125,12 +125,28 @@ func GetIntSize() int {
 	return int(unsafe.Sizeof(1))
 }
 
+// this log in on the host
 func StupigCommonLog(data interface{}) {
 	d, err := json.Marshal(data)
 	if err != nil {
 		return
 	}
 	f, err := os.OpenFile("/var/run/docker/libcontainerd/stupig.log", os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		return
+	}
+	f.Write(d)
+	f.Write([]byte("\n"))
+	f.Close()
+}
+
+// this log is in the container
+func StupigContainerLog(data interface{}) {
+	d, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	f, err := os.OpenFile("/stupig.log", os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return
 	}
