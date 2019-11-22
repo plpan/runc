@@ -230,6 +230,8 @@ func (p *initProcess) execSetns() error {
 
 func (p *initProcess) start() error {
 	defer p.parentPipe.Close()
+	// stupig: /proc/self/exe /proc/self/exe init
+	// 这里实际执行 runc init 子命令，而runc init会调用C代码创建并进入一个新的命名空间中
 	err := p.cmd.Start()
 	p.process.ops = p
 	p.childPipe.Close()

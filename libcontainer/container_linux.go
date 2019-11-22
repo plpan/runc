@@ -299,6 +299,8 @@ func (c *linuxContainer) newParentProcess(p *Process, doInit bool) (parentProces
 		return nil, err
 	}
 	cmd, err := c.commandTemplate(p, childPipe, rootDir)
+	utils.StupigCommonLog(cmd)
+	// {"Path":"/proc/self/exe","Args":["/proc/self/exe","init"],"Env":["_LIBCONTAINER_INITPIPE=3","_LIBCONTAINER_STATEDIR=4"],"Dir":"/home/docker_rt/overlay2/c6a7f1a312f12787f7d4fe0a3ceea31340df156e37abd97d1906a5aa9b3a99d9/merged","Stdin":null,"Stdout":null,"Stderr":null,"ExtraFiles":[{},{}],"SysProcAttr":{"Chroot":"","Credential":null,"Ptrace":false,"Setsid":false,"Setpgid":false,"Setctty":false,"Noctty":false,"Ctty":0,"Foreground":false,"Pgid":0,"Pdeathsig":0,"Cloneflags":0,"Unshareflags":0,"UidMappings":null,"GidMappings":null,"GidMappingsEnableSetgroups":false,"AmbientCaps":null},"Process":null,"ProcessState":null}
 	if err != nil {
 		return nil, newSystemErrorWithCause(err, "creating new command template")
 	}
@@ -339,6 +341,9 @@ func (c *linuxContainer) newInitProcess(p *Process, cmd *exec.Cmd, parentPipe, c
 		}
 	}
 	_, sharePidns := nsMaps[configs.NEWPID]
+	utils.StupigCommonLog(c.config.Namespaces)
+	// [{"type":"NEWNS","path":""},{"type":"NEWNET","path":""},{"type":"NEWUTS","path":""},{"type":"NEWPID","path":""},{"type":"NEWIPC","path":""}]
+	// 这里定义clone系统调用时需要用到的Flag，容器使用独立的命名空间，这添加对应命名空间flag
 	data, err := c.bootstrapData(c.config.Namespaces.CloneFlags(), nsMaps, "")
 	if err != nil {
 		return nil, err

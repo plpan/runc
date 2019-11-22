@@ -13,4 +13,5 @@ elif [ "$cmd" == "b" ]; then
 		exit -1
 	fi
 	mv /bin/docker-runc.bak /bin/docker-runc
+	rm -f /var/run/docker/libcontainerd/stupig.log
 fi
