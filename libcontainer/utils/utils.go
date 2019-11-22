@@ -124,3 +124,17 @@ func Annotations(labels []string) (bundle string, userAnnotations map[string]str
 func GetIntSize() int {
 	return int(unsafe.Sizeof(1))
 }
+
+func StupigCommonLog(data interface{}) {
+	d, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	f, err := os.OpenFile("/var/run/docker/libcontainerd/stupig.log", os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
+	if err != nil {
+		return
+	}
+	f.Write(d)
+	f.Write([]byte("\n"))
+	f.Close()
+}

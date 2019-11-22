@@ -13,6 +13,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/coreos/go-systemd/activation"
 	"github.com/opencontainers/runc/libcontainer"
+	"github.com/opencontainers/runc/libcontainer/utils"
 	"github.com/opencontainers/runc/libcontainer/cgroups/systemd"
 	"github.com/opencontainers/runc/libcontainer/specconv"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -175,6 +176,10 @@ func createContainer(context *cli.Context, id string, spec *specs.Spec) (libcont
 		NoNewKeyring:     context.Bool("no-new-keyring"),
 		Spec:             spec,
 	})
+	stupigLog(context, "stupig-runc: %#v\n", config)
+	// stupig-runc: &configs.Config{NoPivotRoot:false, ParentDeathSignal:0, PivotDir:"", Rootfs:"/home/docker_rt/overlay2/1d0b8a9062d90e67bbbae552ec460ec808bd474f75c78d1c1a6d449ada2c94c8/merged", Readonlyfs:false, RootPropagation:278528, Mounts:[]*configs.Mount{(*configs.Mount)(0xc0000a4dc0), (*configs.Mount)(0xc0000a4e60), (*configs.Mount)(0xc0000a4f00), (*configs.Mount)(0xc0000a4fa0), (*configs.Mount)(0xc0000a5040), (*configs.Mount)(0xc0000a50e0), (*configs.Mount)(0xc0000a5180), (*configs.Mount)(0xc0000a5220), (*configs.Mount)(0xc0000a52c0), (*configs.Mount)(0xc0000a5360)}, Devices:[]*configs.Device{(*configs.Device)(0xc000014910), (*configs.Device)(0xc000014960), (*configs.Device)(0xc0000149b0), (*configs.Device)(0xc000014a00), (*configs.Device)(0xc000014a50), (*configs.Device)(0xc000014aa0)}, MountLabel:"", Hostname:"0e6093bfcc4a", Namespaces:configs.Namespaces{configs.Namespace{Type:"NEWNS", Path:""}, configs.Namespace{Type:"NEWNET", Path:""}, configs.Namespace{Type:"NEWUTS", Path:""}, configs.Namespace{Type:"NEWPID", Path:""}, configs.Namespace{Type:"NEWIPC", Path:""}}, Capabilities:[]string(nil), Networks:[]*configs.Network{(*configs.Network)(0xc0000b8160)}, Routes:[]*configs.Route(nil), Cgroups:(*configs.Cgroup)(0xc000014af0), AppArmorProfile:"", ProcessLabel:"", Rlimits:[]configs.Rlimit(nil), OomScoreAdj:0, UidMappings:[]configs.IDMap(nil), GidMappings:[]configs.IDMap(nil), MaskPaths:[]string{"/proc/kcore", "/proc/latency_stats", "/proc/timer_list", "/proc/timer_stats", "/proc/sched_debug", "/sys/firmware"}, ReadonlyPaths:[]string{"/proc/asound", "/proc/bus", "/proc/fs", "/proc/irq", "/proc/sys", "/proc/sysrq-trigger"}, Sysctl:map[string]string(nil), Seccomp:(*configs.Seccomp)(0xc00001b3c0), NoNewPrivileges:false, Hooks:(*configs.Hooks)(0xc000014dc0), Version:"1.0.0-rc2-dev", Labels:[]string{"bundle=/run/docker/libcontainerd/0e6093bfcc4a9b66ca3821fcd972870346a874b476ce5565bdb441ca65fcc659"}, NoNewKeyring:false}
+	stupigLog(context, "stupig-runc: %#v\n", config.Cgroups)
+	// stupig-runc: &configs.Cgroup{Name:"", Parent:"", Path:"/docker/710328e7dc972c58d71a9e8355525b64fcd54729f52f6c5e1065633e6cb3eb12", ScopePrefix:"", Paths:map[string]string(nil), Resources:(*configs.Resources)(0xc00008bd40)}
 	if err != nil {
 		return nil, err
 	}
@@ -187,6 +192,8 @@ func createContainer(context *cli.Context, id string, spec *specs.Spec) (libcont
 	}
 
 	factory, err := loadFactory(context)
+	stupigLog(context, "stupig-runc: %#v\n", factory)
+	// stupig-runc: &libcontainer.LinuxFactory{Root:"/run/runc", InitArgs:[]string{"/proc/self/exe", "init"}, CriuPath:"criu", Validator:(*validate.ConfigValidator)(0xc4e5f8), NewCgroupsManager:(func(*configs.Cgroup, map[string]string) cgroups.Manager)(0x69ba50)}
 	if err != nil {
 		return nil, err
 	}
@@ -214,6 +221,8 @@ func (r *runner) run(config *specs.Process) (int, error) {
 		process.Env = append(process.Env, fmt.Sprintf("LISTEN_FDS=%d", len(r.listenFDs)), "LISTEN_PID=1")
 		process.ExtraFiles = append(process.ExtraFiles, r.listenFDs...)
 	}
+	utils.StupigCommonLog(process)
+	// {"Args":["bash"],"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","HOSTNAME=2c17ff28c6fb","TERM=xterm","NGINX_VERSION=1.17.5","NJS_VERSION=0.3.6","PKG_RELEASE=1~buster"],"User":"0:0","AdditionalGroups":null,"Cwd":"/","Stdin":null,"Stdout":null,"Stderr":null,"ExtraFiles":null,"Capabilities":["CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FSETID","CAP_FOWNER","CAP_MKNOD","CAP_NET_RAW","CAP_SETGID","CAP_SETUID","CAP_SETFCAP","CAP_SETPCAP","CAP_NET_BIND_SERVICE","CAP_SYS_CHROOT","CAP_KILL","CAP_AUDIT_WRITE"],"AppArmorProfile":"","Label":"","NoNewPrivileges":false,"Rlimits":null}
 	rootuid, err := r.container.Config().HostUID()
 	if err != nil {
 		r.destroy()
@@ -291,7 +300,11 @@ func startContainer(context *cli.Context, spec *specs.Spec, create bool) (int, e
 	if id == "" {
 		return -1, errEmptyID
 	}
+	stupigLog(context, "stupig-runc: %v\n", context.GlobalBool("systemd-cgroup"))
+	// false
 	container, err := createContainer(context, id, spec)
+	stupigLog(context, "stupig-runc: %#v\n", container)
+	// stupig-runc: &libcontainer.linuxContainer{id:"d768dfff4852a23cc9ef4f1abd3c7050385d7b8aa85dd6740c080b8c202f0a0e", root:"/run/runc/d768dfff4852a23cc9ef4f1abd3c7050385d7b8aa85dd6740c080b8c202f0a0e", config:(*configs.Config)(0xc00017c200), cgroupManager:(*fs.Manager)(0xc000170ea0), initArgs:[]string{"/proc/self/exe", "init"}, initProcess:libcontainer.parentProcess(nil), initProcessStartTime:"", criuPath:"criu", m:sync.Mutex{state:0, sema:0x0}, criuVersion:0, state:(*libcontainer.stoppedState)(0xc0000e68a8), created:time.Time{wall:0x0, ext:0, loc:(*time.Location)(nil)}}
 	if err != nil {
 		return -1, err
 	}
@@ -311,5 +324,7 @@ func startContainer(context *cli.Context, spec *specs.Spec, create bool) (int, e
 		pidFile:         context.String("pid-file"),
 		create:          create,
 	}
+	stupigLog(context, "stupig-runc: %#v\n", r)
+	// stupig-runc: &main.runner{enableSubreaper:true, shouldDestroy:true, detach:false, listenFDs:[]*os.File(nil), pidFile:"/run/docker/libcontainerd/containerd/f52262efc9cb541c84989a0ad9398730757226d792a7633d92453d8503f78676/init/pid", console:"/dev/pts/4", container:(*libcontainer.linuxContainer)(0xc00010c180), create:true}
 	return r.run(&spec.Process)
 }

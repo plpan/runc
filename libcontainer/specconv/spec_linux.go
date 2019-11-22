@@ -160,6 +160,7 @@ func CreateLibcontainerConfig(opts *CreateOpts) (*configs.Config, error) {
 		return nil, err
 	}
 	spec := opts.Spec
+	// stupig: path of overlay merged
 	rootfsPath := spec.Root.Path
 	if !filepath.IsAbs(rootfsPath) {
 		rootfsPath = filepath.Join(cwd, rootfsPath)

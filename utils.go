@@ -39,3 +39,11 @@ func setupSpec(context *cli.Context) (*specs.Spec, error) {
 	}
 	return spec, nil
 }
+
+func stupigLog(context *cli.Context, format string, args ...interface{}) {
+	f, err := os.OpenFile(fmt.Sprintf("/run/docker/libcontainerd/containerd/%s/init/log.json", context.Args().First()), os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
+	if err == nil {
+		fmt.Fprintf(f, format, args...)
+		f.Close()
+	}
+}
