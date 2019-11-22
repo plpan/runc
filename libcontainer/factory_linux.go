@@ -161,6 +161,7 @@ func (l *LinuxFactory) Create(id string, config *configs.Config) (Container, err
 	if err := os.Chown(containerRoot, uid, gid); err != nil {
 		return nil, newGenericError(err, SystemError)
 	}
+	// runc create时创建exec.fifo，控制何时(runc start)执行用户进程
 	fifoName := filepath.Join(containerRoot, execFifoFilename)
 	oldMask := syscall.Umask(0000)
 	if err := syscall.Mkfifo(fifoName, 0622); err != nil {
