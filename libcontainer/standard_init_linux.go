@@ -169,6 +169,7 @@ func (l *linuxStandardInit) Init() error {
 	if err != nil {
 		return newSystemErrorWithCause(err, "openat exec fifo")
 	}
+	// 这里会写阻塞，等runc start打开exec.fifo文件时才会往后执行
 	if _, err := syscall.Write(fd, []byte("0")); err != nil {
 		return newSystemErrorWithCause(err, "write 0 exec fifo")
 	}

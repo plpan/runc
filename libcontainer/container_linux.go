@@ -218,6 +218,7 @@ func (c *linuxContainer) Exec() error {
 
 func (c *linuxContainer) exec() error {
 	path := filepath.Join(c.root, execFifoFilename)
+	// start过程就是打开exec.fifo文件，然后runc create的容器开始往后执行
 	f, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
 		return newSystemErrorWithCause(err, "open exec fifo for reading")
@@ -228,6 +229,7 @@ func (c *linuxContainer) exec() error {
 		return err
 	}
 	if len(data) > 0 {
+		// 开始执行后，删除本文件，所以容器目录内看不到这个文件
 		os.Remove(path)
 		return nil
 	}
