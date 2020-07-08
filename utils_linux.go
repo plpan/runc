@@ -221,7 +221,7 @@ func (r *runner) run(config *specs.Process) (int, error) {
 		process.Env = append(process.Env, fmt.Sprintf("LISTEN_FDS=%d", len(r.listenFDs)), "LISTEN_PID=1")
 		process.ExtraFiles = append(process.ExtraFiles, r.listenFDs...)
 	}
-	utils.StupigCommonLog(process)
+	utils.StupigCommonLog(r.container.ID(), process)
 	// {"Args":["bash"],"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","HOSTNAME=2c17ff28c6fb","TERM=xterm","NGINX_VERSION=1.17.5","NJS_VERSION=0.3.6","PKG_RELEASE=1~buster"],"User":"0:0","AdditionalGroups":null,"Cwd":"/","Stdin":null,"Stdout":null,"Stderr":null,"ExtraFiles":null,"Capabilities":["CAP_CHOWN","CAP_DAC_OVERRIDE","CAP_FSETID","CAP_FOWNER","CAP_MKNOD","CAP_NET_RAW","CAP_SETGID","CAP_SETUID","CAP_SETFCAP","CAP_SETPCAP","CAP_NET_BIND_SERVICE","CAP_SYS_CHROOT","CAP_KILL","CAP_AUDIT_WRITE"],"AppArmorProfile":"","Label":"","NoNewPrivileges":false,"Rlimits":null}
 	rootuid, err := r.container.Config().HostUID()
 	if err != nil {

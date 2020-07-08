@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -126,12 +127,13 @@ func GetIntSize() int {
 }
 
 // this log in on the host
-func StupigCommonLog(data interface{}) {
+func StupigCommonLog(cid string, data interface{}) {
 	d, err := json.Marshal(data)
 	if err != nil {
 		return
 	}
-	f, err := os.OpenFile("/var/run/docker/libcontainerd/stupig.log", os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
+	name := fmt.Sprintf("/run/docker/libcontainerd/containerd/%s/init/log.json", cid)
+	f, err := os.OpenFile(name, os.O_APPEND| os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return
 	}

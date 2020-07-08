@@ -537,8 +537,6 @@ func rootfsParentMountPrivate(rootfs string) error {
 
 func prepareRoot(config *configs.Config) error {
 	flag := syscall.MS_SLAVE | syscall.MS_REC
-	libcontainerUtils.StupigCommonLog(config.RootPropagation)
-	// 0x44000  [ MS_PRIVATE | MS_REC ]
 	// 这里因环境而异
 	if config.RootPropagation != 0 {
 		flag = config.RootPropagation
